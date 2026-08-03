@@ -1,0 +1,36 @@
+{
+  "name": "parallax",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PARALLAX — Engineering Intelligence Platform. GitHub activity → engineering health, risk, and recommendations.",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n web,api,worker -c cyan,magenta,yellow \"npm run dev -w @parallax/web\" \"npm run dev -w @parallax/api\" \"npm run dev:worker -w @parallax/api\"",
+    "dev:web": "npm run dev -w @parallax/web",
+    "dev:api": "npm run dev -w @parallax/api",
+    "dev:worker": "npm run dev:worker -w @parallax/api",
+    "build": "npm run build --workspaces",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "playwright test",
+    "seed": "npm run seed -w @parallax/api",
+    "gen": "npm run gen -w @parallax/web",
+    "format": "prettier --write \"**/*.{ts,tsx,graphql,json,md,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,graphql,json,md,css}\""
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.1",
+    "concurrently": "^9.1.2",
+    "eslint": "^9.21.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.0"
+  }
+}
