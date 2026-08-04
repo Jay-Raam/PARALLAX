@@ -1,0 +1,1265 @@
+"""
+PARALLAX Engineering Intelligence Platform
+GitHub records what happened. PARALLAX explains what it means.
+"""
+
+scalar DateTime
+scalar JSON
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum Severity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum UpdateType {
+  NONE
+  PATCH
+  MINOR
+  MAJOR
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum SyncStatus {
+  NOT_SYNCED
+  SYNCING
+  SYNCED
+  ERROR
+}
+
+enum SyncJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum PRState {
+  OPEN
+  CLOSED
+  MERGED
+}
+
+enum IssueState {
+  OPEN
+  CLOSED
+}
+
+enum WorkflowRunStatus {
+  QUEUED
+  IN_PROGRESS
+  COMPLETED
+  ACTION_REQUIRED
+  CANCELLED
+  FAILURE
+  NEUTRAL
+  SKIPPED
+  STALE
+  SUCCESS
+}
+
+enum DeploymentStatus {
+  PENDING
+  SUCCESS
+  FAILURE
+  INACTIVE
+}
+
+enum RecommendationStatus {
+  ACTIVE
+  COMPLETED
+  DISMISSED
+}
+
+enum RecommendationType {
+  DEPENDENCY_UPDATE
+  SECURITY_VULNERABILITY
+  STALE_ISSUES
+  SLOW_REVIEWS
+  CI_FAILURES
+  DEPLOYMENT_FAILURES
+  TESTING_GAPS
+  DOCUMENTATION_INACTIVITY
+  SECURITY_POSTURE
+  DELIVERY_BOTTLENECK
+}
+
+enum NotificationType {
+  PR_RISK
+  SECURITY_VULNERABILITY
+  CI_FAILURE
+  DEPLOYMENT_FAILURE
+  HEALTH_DROP
+  DEPENDENCY_VULNERABILITY
+  RECOMMENDATION
+  SYNC_COMPLETE
+}
+
+enum ActivityFilter {
+  ALL
+  COMMITS
+  PRS
+  ISSUES
+  DEPLOYMENTS
+  RELEASES
+  SECURITY
+  REVIEWS
+  CI
+}
+
+enum SecurityCategory {
+  DEPENDABOT
+  SECRET_SCANNING
+  CODE_SCANNING
+  WORKFLOW_SECURITY
+  DEPENDENCY_VULNERABILITIES
+  REPOSITORY_PERMISSIONS
+  BRANCH_PROTECTION
+}
+
+enum Range {
+  _7D
+  _14D
+  _30D
+  _90D
+}
+
+enum CommitClassification {
+  feature
+  bugfix
+  refactor
+  docs
+  tests
+  chore
+  dependency
+}
+
+enum RepoHealthFilter {
+  ALL
+  HEALTHY
+  NEEDS_ATTENTION
+  AT_RISK
+}
+
+enum RepoActivityFilter {
+  ALL
+  ACTIVE
+  IDLE
+  NEW
+}
+
+enum RepoSort {
+  NAME
+  HEALTH
+  ACTIVITY
+  PRS
+  ISSUES
+}
+
+enum RepoStatusFilter {
+  ALL
+  SYNCED
+  SYNCING
+  ERROR
+}
+
+enum PRStateFilter {
+  ALL
+  OPEN
+  MERGED
+  CLOSED
+}
+
+enum IssueStateFilter {
+  ALL
+  OPEN
+  CLOSED
+}
+
+enum DependencyFilter {
+  ALL
+  CRITICAL
+  MAJOR
+  MINOR
+  PATCH
+  SECURITY
+}
+
+enum SeverityFilter {
+  ALL
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum WorkflowStatusFilter {
+  ALL
+  SUCCESS
+  FAILURE
+  CANCELLED
+  IN_PROGRESS
+}
+
+enum RiskFilter {
+  ALL
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AlertStateFilter {
+  ALL
+  OPEN
+  FIXED
+  DISMISSED
+}
+
+"""Cursor-based pagination connection"""
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+input PaginationInput {
+  first: Int
+  after: String
+  last: Int
+  before: String
+}
+
+input RepositoryFilters {
+  search: String
+  language: String
+  health: RepoHealthFilter
+  activity: RepoActivityFilter
+  status: RepoStatusFilter
+  sort: RepoSort
+}
+
+input CommitFilters {
+  author: String
+  classification: CommitClassification
+  since: DateTime
+  until: DateTime
+}
+
+input PullRequestFilters {
+  state: PRStateFilter
+  author: String
+  risk: RiskFilter
+  label: String
+}
+
+input IssueFilters {
+  state: IssueStateFilter
+  stale: Boolean
+  critical: Boolean
+  label: String
+}
+
+input DependencyFilters {
+  update: DependencyFilter
+  ecosystem: String
+  search: String
+}
+
+input SecurityFilters {
+  severity: SeverityFilter
+  state: AlertStateFilter
+  category: SecurityCategory
+}
+
+input WorkflowFilters {
+  status: WorkflowStatusFilter
+  branch: String
+}
+
+input UpdateProfileInput {
+  name: String
+  email: String
+  avatarUrl: String
+}
+
+input WorkspaceSettingsInput {
+  defaultBranch: String
+  timezone: String
+  syncIntervalMinutes: Int
+  healthThreshold: Int
+}
+
+input UpdateWorkspaceInput {
+  name: String
+  slug: String
+  settings: WorkspaceSettingsInput
+}
+
+input NotificationPreferenceInput {
+  enabled: Boolean
+  types: [NotificationType!]
+}
+
+input AddMemberInput {
+  email: String!
+  role: Role!
+}
+
+input UpdateMemberRoleInput {
+  memberId: ID!
+  role: Role!
+}
+
+input UpdateRoleInput {
+  userId: ID!
+  role: Role!
+}
+
+"""Connection types"""
+type UserConnection {
+  edges: [UserEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type UserEdge {
+  node: User!
+  cursor: String!
+}
+
+type RepositoryConnection {
+  edges: [RepositoryEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type RepositoryEdge {
+  node: Repository!
+  cursor: String!
+}
+
+type CommitConnection {
+  edges: [CommitEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type CommitEdge {
+  node: Commit!
+  cursor: String!
+}
+
+type PullRequestConnection {
+  edges: [PullRequestEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type PullRequestEdge {
+  node: PullRequest!
+  cursor: String!
+}
+
+type IssueConnection {
+  edges: [IssueEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type IssueEdge {
+  node: Issue!
+  cursor: String!
+}
+
+type DependencyConnection {
+  edges: [DependencyEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DependencyEdge {
+  node: Dependency!
+  cursor: String!
+}
+
+type SecurityAlertConnection {
+  edges: [SecurityAlertEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type SecurityAlertEdge {
+  node: SecurityAlert!
+  cursor: String!
+}
+
+type WorkflowRunConnection {
+  edges: [WorkflowRunEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type WorkflowRunEdge {
+  node: WorkflowRun!
+  cursor: String!
+}
+
+type DeploymentConnection {
+  edges: [DeploymentEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DeploymentEdge {
+  node: Deployment!
+  cursor: String!
+}
+
+type ReleaseConnection {
+  edges: [ReleaseEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ReleaseEdge {
+  node: Release!
+  cursor: String!
+}
+
+type ContributorConnection {
+  edges: [ContributorEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ContributorEdge {
+  node: Contributor!
+  cursor: String!
+}
+
+type RecommendationConnection {
+  edges: [RecommendationEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type RecommendationEdge {
+  node: Recommendation!
+  cursor: String!
+}
+
+type NotificationConnection {
+  edges: [NotificationEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type NotificationEdge {
+  node: Notification!
+  cursor: String!
+}
+
+type AuditLogConnection {
+  edges: [AuditLogEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AuditLogEdge {
+  node: AuditLog!
+  cursor: String!
+}
+
+type ActivityConnection {
+  edges: [ActivityItemEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ActivityItemEdge {
+  node: ActivityItem!
+  cursor: String!
+}
+
+type SearchResults {
+  repositories: [Repository!]!
+  pullRequests: [PullRequest!]!
+  issues: [Issue!]!
+  commits: [Commit!]!
+  dependencies: [Dependency!]!
+  deployments: [Deployment!]!
+  contributors: [Contributor!]!
+  recommendations: [Recommendation!]!
+}
+
+"""Core domain types"""
+type User {
+  id: ID!
+  email: String!
+  name: String!
+  avatarUrl: String
+  githubLogin: String
+  createdAt: DateTime!
+  lastSeenAt: DateTime
+}
+
+type WorkspaceMember {
+  id: ID!
+  workspaceId: ID!
+  userId: ID!
+  user: User!
+  role: Role!
+  joinedAt: DateTime!
+}
+
+type Workspace {
+  id: ID!
+  name: String!
+  slug: String!
+  ownerId: ID!
+  owner: User!
+  members: [WorkspaceMember!]!
+  repositories: RepositoryConnection!
+  settings: WorkspaceSettings!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  health: Int
+  stats: WorkspaceStats
+}
+
+type WorkspaceSettings {
+  defaultBranch: String
+  timezone: String
+  syncIntervalMinutes: Int
+  healthThreshold: Int
+}
+
+type WorkspaceStats {
+  repositories: Int!
+  openPrs: Int!
+  openIssues: Int!
+  deployments30d: Int!
+  securityAlerts: Int!
+}
+
+type GitHubAccount {
+  id: ID!
+  githubLogin: String!
+  connectedAt: DateTime!
+  lastSyncAt: DateTime
+}
+
+type Repository {
+  id: ID!
+  workspaceId: ID!
+  githubId: Int!
+  name: String!
+  fullName: String!
+  owner: String!
+  description: String
+  url: String!
+  defaultBranch: String!
+  isPrivate: Boolean!
+  language: String
+  techStack: [String!]!
+  topics: [String!]!
+  fork: Boolean!
+  archived: Boolean!
+  createdAt: DateTime!
+  pushedAt: DateTime
+  starCount: Int!
+  forkCount: Int!
+  openIssuesCount: Int!
+  syncStatus: SyncStatus!
+  lastSyncedAt: DateTime
+  source: String!
+  enabled: Boolean!
+  health: RepositoryHealth
+  counts: RepositoryCounts
+  lastActivityAt: DateTime
+}
+
+type RepositoryCounts {
+  commits: Int!
+  openPrs: Int!
+  mergedPrs: Int!
+  openIssues: Int!
+  closedIssues: Int!
+  dependencies: Int!
+  outdatedDependencies: Int!
+  securityAlerts: Int!
+  deployments: Int!
+  releases: Int!
+  contributors: Int!
+}
+
+type RepositoryHealth {
+  repositoryId: ID!
+  overall: Int!
+  label: String!
+  change: Int!
+  breakdown: [HealthCategory!]!
+  trend: [HealthTrendPoint!]!
+  explanations: [String!]!
+  risks: [String!]!
+  computedAt: DateTime!
+}
+
+type HealthCategory {
+  key: String!
+  label: String!
+  score: Int!
+  weight: Int!
+}
+
+type HealthTrendPoint {
+  date: DateTime!
+  score: Int!
+}
+
+type Branch {
+  id: ID!
+  name: String!
+  headSha: String!
+  isDefault: Boolean!
+  lastCommitAt: DateTime
+}
+
+type Commit {
+  id: ID!
+  repositoryId: ID!
+  sha: String!
+  authorLogin: String!
+  authorName: String!
+  message: String!
+  messageTitle: String!
+  date: DateTime!
+  additions: Int!
+  deletions: Int!
+  filesChanged: Int!
+  isMerge: Boolean!
+  classification: CommitClassification!
+  repository: Repository
+}
+
+type PullRequestReview {
+  id: ID!
+  reviewerLogin: String!
+  state: String!
+  submittedAt: DateTime
+  body: String
+}
+
+type PRLifecycle {
+  stage: String!
+  at: DateTime
+}
+
+type PRRisk {
+  score: Int!
+  level: RiskLevel!
+  factors: [String!]!
+  explanation: String!
+}
+
+type PullRequest {
+  id: ID!
+  repositoryId: ID!
+  githubNumber: Int!
+  title: String!
+  body: String
+  state: PRState!
+  authorLogin: String!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  closedAt: DateTime
+  mergedAt: DateTime
+  baseRef: String!
+  headRef: String!
+  additions: Int!
+  deletions: Int!
+  changedFiles: Int!
+  commits: Int!
+  isDraft: Boolean!
+  labels: [String!]!
+  reviewDecision: String
+  risk: PRRisk
+  reviewTimeMs: Int
+  approvalTimeMs: Int
+  mergeTimeMs: Int
+  deployTimeMs: Int
+  testFilesChanged: Int!
+  dependenciesChanged: Int!
+  authFilesChanged: Int!
+  migrationFilesChanged: Int!
+  files: [String!]!
+  lifecycle: [PRLifecycle!]!
+  reviews: [PullRequestReview!]!
+  repository: Repository
+  author: Contributor
+}
+
+type Issue {
+  id: ID!
+  repositoryId: ID!
+  githubNumber: Int!
+  title: String!
+  body: String
+  state: IssueState!
+  authorLogin: String!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  closedAt: DateTime
+  labels: [String!]!
+  assignees: [String!]!
+  commentsCount: Int!
+  daysInactive: Int!
+  isStale: Boolean!
+  isCritical: Boolean!
+  repository: Repository
+}
+
+type Dependency {
+  id: ID!
+  repositoryId: ID!
+  name: String!
+  ecosystem: String!
+  currentVersion: String!
+  latestVersion: String
+  updateType: UpdateType!
+  risk: RiskLevel!
+  vulnerabilities: [DependencyVulnerability!]!
+  isDirect: Boolean!
+  outdated: Boolean!
+  packageManager: String
+  repository: Repository
+}
+
+type DependencyVulnerability {
+  severity: Severity!
+  advisory: String
+}
+
+type SecurityAlert {
+  id: ID!
+  repositoryId: ID!
+  type: SecurityCategory!
+  severity: Severity!
+  title: String!
+  description: String
+  state: String!
+  createdAt: DateTime!
+  url: String
+  packageName: String
+  repository: Repository
+}
+
+type Workflow {
+  id: ID!
+  repositoryId: ID!
+  name: String!
+  path: String!
+  state: String!
+}
+
+type WorkflowStep {
+  name: String!
+  status: String!
+  conclusion: String
+  durationMs: Int
+}
+
+type WorkflowRun {
+  id: ID!
+  repositoryId: ID!
+  workflowId: ID!
+  workflowName: String!
+  runNumber: Int!
+  event: String!
+  status: WorkflowRunStatus!
+  headSha: String!
+  branch: String!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  durationMs: Int
+  steps: [WorkflowStep!]!
+  repository: Repository
+}
+
+type Deployment {
+  id: ID!
+  repositoryId: ID!
+  environment: String!
+  ref: String!
+  sha: String!
+  creatorLogin: String!
+  status: DeploymentStatus!
+  description: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+  version: String
+  repository: Repository
+}
+
+type Release {
+  id: ID!
+  repositoryId: ID!
+  tagName: String!
+  name: String
+  publishedAt: DateTime!
+  authorLogin: String!
+  isPrerelease: Boolean!
+  body: String
+  commitSha: String
+  commitCount: Int!
+  features: [String!]!
+  bugFixes: [String!]!
+  breakingChanges: [String!]!
+  dependencyChanges: [String!]!
+  health: ReleaseHealth
+  repository: Repository
+}
+
+type ReleaseHealth {
+  score: Int!
+  label: String!
+  features: Int!
+  bugFixes: Int!
+  breakingChanges: Int!
+  dependencyChanges: Int!
+  commitCount: Int!
+  explanation: String!
+}
+
+type Contributor {
+  id: ID!
+  repositoryId: ID!
+  login: String!
+  name: String
+  avatarUrl: String
+  role: String!
+  commits: Int!
+  additions: Int!
+  deletions: Int!
+  pullRequestsCreated: Int!
+  reviewsGiven: Int!
+  issuesOpened: Int!
+  issuesClosed: Int!
+  firstContributionAt: DateTime!
+  lastContributionAt: DateTime!
+  repository: Repository
+}
+
+type SyncJob {
+  id: ID!
+  workspaceId: ID!
+  repositoryId: ID!
+  type: String!
+  status: SyncJobStatus!
+  progress: SyncProgress!
+  stats: JSON!
+  error: String
+  startedAt: DateTime
+  completedAt: DateTime
+  triggeredBy: String!
+}
+
+type SyncProgress {
+  phase: String!
+  current: Int!
+  total: Int!
+  percent: Int!
+}
+
+type MetricPoint {
+  date: DateTime!
+  commits: Int!
+  pullRequests: Int!
+  mergedPrs: Int!
+  issuesOpened: Int!
+  issuesClosed: Int!
+  deployments: Int!
+  releases: Int!
+  buildSuccessRate: Float
+  avgBuildTimeMs: Float
+}
+
+type CommitAnalytics {
+  today: Int!
+  thisWeek: Int!
+  thisMonth: Int!
+  activity: [MetricPoint!]!
+  classification: [CommitClassificationCount!]!
+  contributors: [ContributorActivity!]!
+  weeklyDistribution: [MetricPoint!]!
+}
+
+type CommitClassificationCount {
+  classification: CommitClassification!
+  count: Int!
+}
+
+type ContributorActivity {
+  login: String!
+  commits: Int!
+  additions: Int!
+  deletions: Int!
+}
+
+type PRAnalytics {
+  openCount: Int!
+  mergedCount: Int!
+  averageCycleTimeMs: Float!
+  averageReviewTimeMs: Float!
+  averageMergeTimeMs: Float!
+  mergeRate: Float!
+  cycleTimeSeries: [MetricPoint!]!
+  riskDistribution: [RiskBucket!]!
+}
+
+type RiskBucket {
+  level: RiskLevel!
+  count: Int!
+}
+
+type IssueAnalytics {
+  open: Int!
+  closed: Int!
+  stale: Int!
+  critical: Int!
+  averageAgeDays: Float!
+  averageResolutionDays: Float!
+  resolutionSeries: [MetricPoint!]!
+}
+
+type DependencyAnalytics {
+  total: Int!
+  outdated: Int!
+  vulnerable: Int!
+  critical: Int!
+  byUpdateType: [DependencyBucket!]!
+  bySeverity: [SeverityBucket!]!
+  topOutdated: [Dependency!]!
+}
+
+type DependencyBucket {
+  updateType: UpdateType!
+  count: Int!
+}
+
+type SeverityBucket {
+  severity: Severity!
+  count: Int!
+}
+
+type SecurityAnalytics {
+  score: Int!
+  critical: Int!
+  high: Int!
+  medium: Int!
+  low: Int!
+  open: Int!
+  fixed: Int!
+  byCategory: [SecurityCategoryBucket!]!
+  recent: [SecurityAlert!]!
+}
+
+type SecurityCategoryBucket {
+  category: SecurityCategory!
+  count: Int!
+}
+
+type CICDAnalytics {
+  buildSuccessRate: Float!
+  averageBuildTimeMs: Float!
+  failedRuns: Int!
+  successfulRuns: Int!
+  totalRuns: Int!
+  deployments: Int!
+  successSeries: [MetricPoint!]!
+  pipelineStages: [PipelineStageStat!]!
+}
+
+type PipelineStageStat {
+  name: String!
+  status: String!
+  averageMs: Float!
+  count: Int!
+}
+
+type DeploymentAnalytics {
+  total: Int!
+  successful: Int!
+  failed: Int!
+  byEnvironment: [DeploymentBucket!]!
+  series: [MetricPoint!]!
+  averageTimeToDeployMs: Float!
+}
+
+type DeploymentBucket {
+  environment: String!
+  count: Int!
+}
+
+type ReleaseAnalytics {
+  total: Int!
+  prereleases: Int!
+  averageCommits: Float!
+  series: [MetricPoint!]!
+  latest: [Release!]!
+}
+
+type ContributorAnalytics {
+  total: Int!
+  active30d: Int!
+  totalCommits: Int!
+  totalAdditions: Int!
+  totalDeletions: Int!
+  commitsByAuthor: [ContributorActivity!]!
+  activitySeries: [MetricPoint!]!
+  busFactor: Int!
+}
+
+type DeliveryFunnelStage {
+  stage: String!
+  from: String!
+  to: String!
+  averageMs: Float!
+  count: Int!
+  changePct: Float
+  isBottleneck: Boolean!
+}
+
+type DeliveryFunnel {
+  stages: [DeliveryFunnelStage!]!
+  bottleneck: DeliveryFunnelStage
+  currentCycleTimeMs: Float!
+  previousCycleTimeMs: Float!
+  cycleTimeChangePct: Float!
+}
+
+type RepositoryComparisonItem {
+  repositoryId: ID!
+  name: String!
+  health: Int!
+  commits: Int!
+  pullRequests: Int!
+  cycleTimeMs: Float!
+  buildSuccessRate: Float!
+  contributors: Int!
+  openIssues: Int!
+  staleIssues: Int!
+}
+
+type EngineeringOverview {
+  health: Int!
+  healthChange: Int!
+  repositories: Int!
+  openPrs: Int!
+  openIssues: Int!
+  deployments: Int!
+  securityAlerts: Int!
+  commits30d: Int!
+  topRisks: [String!]!
+  bottleneck: String
+  recommendations: [Recommendation!]!
+  healthTrend: [HealthTrendPoint!]!
+  activity: ActivityConnection!
+  recentDeployments: [Deployment!]!
+}
+
+type ActivityItem {
+  id: ID!
+  at: DateTime!
+  type: ActivityFilter!
+  repositoryId: ID
+  repositoryName: String
+  title: String!
+  subtitle: String
+  meta: JSON
+}
+
+type Recommendation {
+  id: ID!
+  workspaceId: ID!
+  repositoryId: ID
+  type: RecommendationType!
+  priority: Priority!
+  title: String!
+  reason: String!
+  evidence: JSON!
+  impact: String!
+  suggestedAction: String!
+  status: RecommendationStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  repository: Repository
+}
+
+type Notification {
+  id: ID!
+  workspaceId: ID!
+  userId: ID
+  type: NotificationType!
+  severity: Severity!
+  title: String!
+  body: String
+  data: JSON
+  readAt: DateTime
+  createdAt: DateTime!
+  url: String
+}
+
+type NotificationPreferences {
+  enabled: Boolean!
+  types: [NotificationType!]!
+}
+
+type AuditLog {
+  id: ID!
+  workspaceId: ID!
+  actorId: ID!
+  actorName: String
+  action: String!
+  targetType: String
+  targetId: String
+  metadata: JSON
+  ip: String
+  createdAt: DateTime!
+}
+
+type AuthPayload {
+  user: User!
+  workspace: Workspace!
+}
+
+type SyncPayload {
+  syncJob: SyncJob!
+}
+
+type AvailableRepository {
+  githubId: Int!
+  name: String!
+  fullName: String!
+  language: String
+  description: String
+  isPrivate: Boolean!
+  connected: Boolean!
+}
+
+type ConnectGitHubPayload {
+  githubAccount: GitHubAccount!
+  repositories: RepositoryConnection!
+}
+
+"""Queries"""
+type Query {
+  me: User
+  workspaces: [Workspace!]!
+  workspace(id: ID!): Workspace!
+  members: [WorkspaceMember!]!
+  githubAccount: GitHubAccount
+
+  repositories(filters: RepositoryFilters, pagination: PaginationInput): RepositoryConnection!
+  repository(id: ID!): Repository!
+  repositoryHealth(id: ID!, range: Range): RepositoryHealth
+  branches(repositoryId: ID!): [Branch!]!
+  commits(repositoryId: ID!, filters: CommitFilters, pagination: PaginationInput): CommitConnection!
+  commit(id: ID!): Commit
+  pullRequests(repositoryId: ID, filters: PullRequestFilters, pagination: PaginationInput): PullRequestConnection!
+  pullRequest(id: ID!): PullRequest!
+  issues(repositoryId: ID, filters: IssueFilters, pagination: PaginationInput): IssueConnection!
+  issue(id: ID!): Issue
+  dependencies(repositoryId: ID, filters: DependencyFilters, pagination: PaginationInput): DependencyConnection!
+  securityAlerts(repositoryId: ID, filters: SecurityFilters, pagination: PaginationInput): SecurityAlertConnection!
+  workflows(repositoryId: ID!): [Workflow!]!
+  workflowRuns(repositoryId: ID, filters: WorkflowFilters, pagination: PaginationInput): WorkflowRunConnection!
+  deployments(repositoryId: ID, pagination: PaginationInput): DeploymentConnection!
+  releases(repositoryId: ID, pagination: PaginationInput): ReleaseConnection!
+  contributors(repositoryId: ID, pagination: PaginationInput): ContributorConnection!
+  recommendations(status: RecommendationStatus, pagination: PaginationInput): RecommendationConnection!
+  notifications(pagination: PaginationInput): NotificationConnection!
+  unreadNotificationCount: Int!
+  notificationPreferences: NotificationPreferences!
+  auditLogs(pagination: PaginationInput): AuditLogConnection!
+
+  engineeringOverview: EngineeringOverview!
+  engineeringActivity(filters: [ActivityFilter!], pagination: PaginationInput): ActivityConnection!
+  commitAnalytics(repositoryId: ID, range: Range): CommitAnalytics!
+  pullRequestAnalytics(repositoryId: ID, range: Range): PRAnalytics!
+  issueAnalytics(repositoryId: ID, range: Range): IssueAnalytics!
+  dependencyAnalytics(repositoryId: ID): DependencyAnalytics!
+  securityAnalytics(repositoryId: ID): SecurityAnalytics!
+  cicdAnalytics(repositoryId: ID, range: Range): CICDAnalytics!
+  deploymentAnalytics(repositoryId: ID, range: Range): DeploymentAnalytics!
+  releaseAnalytics(repositoryId: ID, range: Range): ReleaseAnalytics!
+  contributorAnalytics(repositoryId: ID, range: Range): ContributorAnalytics!
+  deliveryAnalytics(repositoryId: ID, range: Range): DeliveryFunnel!
+  repositoryComparison(range: Range): [RepositoryComparisonItem!]!
+
+  syncJob(repositoryId: ID!): SyncJob
+  search(query: String!, limit: Int): SearchResults!
+  availableRepositories: [AvailableRepository!]!
+}
+
+"""Mutations"""
+type Mutation {
+  login(email: String!): AuthPayload!
+  logout: Boolean!
+
+  createWorkspace(name: String!): Workspace!
+  switchWorkspace(id: ID!): Workspace!
+  updateWorkspace(id: ID!, input: UpdateWorkspaceInput!): Workspace!
+  addMember(input: AddMemberInput!): WorkspaceMember!
+  updateMemberRole(input: UpdateRoleInput!): WorkspaceMember!
+  removeMember(userId: ID!): Boolean!
+
+  connectGitHub(code: String!): ConnectGitHubPayload!
+  disconnectGitHub: Boolean!
+
+  connectRepository(githubId: Int!): Repository!
+  disconnectRepository(repositoryId: ID!): Boolean!
+  syncRepository(repositoryId: ID!, incremental: Boolean): SyncPayload!
+  syncWorkspace: [SyncPayload!]!
+
+  updateProfile(input: UpdateProfileInput!): User!
+  updateNotificationPreferences(input: NotificationPreferenceInput!): NotificationPreferences!
+
+  markRecommendationComplete(id: ID!): Recommendation!
+  dismissRecommendation(id: ID!): Recommendation!
+  markNotificationRead(id: ID!): Notification!
+  markAllNotificationsRead: Boolean!
+}
+
+"""Subscriptions"""
+type Subscription {
+  syncProgressUpdated(repositoryId: ID!): SyncJob!
+  notificationCreated: Notification!
+  repositoryHealthUpdated(repositoryId: ID): RepositoryHealth!
+  workflowRunUpdated(repositoryId: ID): WorkflowRun!
+  deploymentUpdated(repositoryId: ID): Deployment!
+}

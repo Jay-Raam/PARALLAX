@@ -1,0 +1,16 @@
+{
+  "name": "@parallax/graphql",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/schema.graphql",
+  "exports": {
+    ".": "./src/schema.graphql"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  }
+}
