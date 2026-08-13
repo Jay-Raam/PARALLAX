@@ -1,0 +1,265 @@
+@import "tailwindcss";
+
+/*
+  PARALLAX design system — "survey instrument"
+  The product measures a software system the way a theodolite measures a site:
+  a deep blue-graphite instrument body, warm brass for signals and readouts,
+  hairline structural rules, and monospace data etched like an engraved dial.
+
+  Roles:
+    --font-display  Space Grotesk  — engraved instrument labels, headings, big numbers
+    --font-sans     Inter          — quiet body copy
+    --font-mono     IBM Plex Mono  — readouts, eyebrows, table data
+*/
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-space), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex), ui-monospace, SFMono-Regular, "JetBrains Mono",
+    Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* instrument body surfaces */
+  --color-background: #0a0c0f;
+  --color-surface: #101318;
+  --color-raised: #161a21;
+  --color-overlay: #1b2029;
+  --color-foreground: #e8e9e6;
+  --color-muted: #a3a7ad;
+  --color-subtle: #747b84;
+  --color-faint: #4c525b;
+  --color-border: #1e232b;
+  --color-border-strong: #2e3540;
+
+  /* signal — brass */
+  --color-accent: #c9a35f;
+  --color-accent-hover: #dbb97e;
+  --color-accent-foreground: #191206;
+  --color-accent-dim: #2a2112;
+
+  /* status */
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-info: #7db7f5;
+
+  /* charts — instrument glass, brass first */
+  --color-chart-1: #c9a35f;
+  --color-chart-2: #7db7f5;
+  --color-chart-3: #fbbf24;
+  --color-chart-4: #34d399;
+  --color-chart-5: #fb7185;
+  --color-chart-6: #a78bfa;
+  --color-chart-7: #a3e635;
+  --color-chart-8: #fb923c;
+
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 8px;
+
+  --shadow-panel: 0 1px 2px rgb(0 0 0 / 0.45);
+  --shadow-pop: 0 8px 28px rgb(0 0 0 / 0.55);
+
+  --animate-fade-in: fade-in 0.16s ease-out;
+  --animate-slide-down: slide-down 0.18s ease-out;
+  --animate-scale-in: scale-in 0.14s ease-out;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+/* Light theme — applied via .light on <html> */
+.light {
+  --color-background: #f5f4f1;
+  --color-surface: #fcfbf8;
+  --color-raised: #ecebe6;
+  --color-overlay: #ffffff;
+  --color-foreground: #1c1b18;
+  --color-muted: #5c5a54;
+  --color-subtle: #8a877e;
+  --color-faint: #b6b3a9;
+  --color-border: #e0ddd6;
+  --color-border-strong: #c8c4ba;
+
+  --color-accent: #8a5a1f;
+  --color-accent-hover: #6f4716;
+  --color-accent-foreground: #ffffff;
+  --color-accent-dim: #f2e9d8;
+
+  --color-success: #0e8a5f;
+  --color-warning: #b45309;
+  --color-danger: #c53030;
+  --color-info: #1d5fb0;
+
+  --color-chart-1: #8a5a1f;
+  --color-chart-2: #2563eb;
+  --color-chart-3: #b45309;
+  --color-chart-4: #0e8a5f;
+  --color-chart-5: #c53030;
+  --color-chart-6: #6d28d9;
+  --color-chart-7: #4d7c0f;
+  --color-chart-8: #c2410c;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: dark;
+    scrollbar-gutter: stable;
+  }
+
+  html.light {
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-size: 14px;
+    letter-spacing: -0.005em;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    @apply font-display;
+    letter-spacing: -0.015em;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-accent-foreground);
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: 5px;
+    border: 2px solid var(--color-background);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-faint);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .panel {
+    @apply bg-surface border border-border rounded-md;
+    box-shadow: var(--shadow-panel);
+  }
+
+  .panel-interactive {
+    @apply transition-colors duration-100 hover:border-border-strong;
+  }
+
+  .input {
+    @apply w-full bg-raised border border-border rounded-sm px-2.5 py-1.5 text-[13px] text-foreground placeholder:text-faint focus:border-accent focus:outline-none;
+  }
+
+  .label {
+    @apply text-[11px] font-medium uppercase tracking-wider text-subtle;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-sm text-[13px] font-medium transition-colors duration-100 focus-visible:outline-accent disabled:pointer-events-none disabled:opacity-50 cursor-pointer whitespace-nowrap select-none;
+  }
+  .btn-sm {
+    @apply px-2 py-1 text-xs;
+  }
+  .btn-md {
+    @apply px-3 py-1.5;
+  }
+  .btn-primary {
+    @apply bg-accent text-accent-foreground hover:bg-accent-hover;
+  }
+  .btn-outline {
+    @apply border border-border-strong bg-transparent text-foreground hover:bg-raised;
+  }
+  .btn-ghost {
+    @apply text-muted hover:text-foreground hover:bg-raised;
+  }
+  .btn-danger {
+    @apply border border-danger/40 bg-danger/10 text-danger hover:bg-danger/20;
+  }
+
+  .kbd {
+    @apply inline-flex items-center justify-center rounded-xs border border-border bg-raised px-1.5 py-0.5 font-mono text-[10.5px] leading-none text-muted;
+  }
+
+  .mono {
+    @apply font-mono tabular-nums;
+  }
+
+  .th {
+    @apply px-3 py-2 text-left text-[11px] font-medium uppercase tracking-wider text-subtle whitespace-nowrap;
+  }
+  .td {
+    @apply px-3 py-2 text-[13px] text-foreground align-middle;
+  }
+  .tr-hover {
+    @apply transition-colors hover:bg-raised/60;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-2.5 rounded-sm px-2.5 py-1.5 text-[13px] text-muted transition-colors hover:text-foreground hover:bg-raised;
+  }
+  .nav-item-active {
+    @apply bg-raised text-foreground;
+  }
+
+  .scroll-thin {
+    scrollbar-width: thin;
+  }
+}
