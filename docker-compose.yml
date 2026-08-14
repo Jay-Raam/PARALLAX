@@ -1,0 +1,90 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: parallax-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: parallax
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: parallax-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: parallax-api
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      MONGODB_URI: mongodb://mongodb:27017/parallax
+      REDIS_URL: redis://redis:6379
+      CORS_ORIGIN: http://localhost:3000
+      SESSION_SECRET: change-me-in-production
+      ENCRYPTION_KEY: change-me-too-32-bytes-minimum
+      LOG_LEVEL: info
+    ports:
+      - "4000:4000"
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    container_name: parallax-worker
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://mongodb:27017/parallax
+      REDIS_URL: redis://redis:6379
+      SESSION_SECRET: change-me-in-production
+      ENCRYPTION_KEY: change-me-too-32-bytes-minimum
+      LOG_LEVEL: info
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    container_name: parallax-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_GRAPHQL_URL: http://localhost:4000/graphql
+    ports:
+      - "3000:3000"
+
+volumes:
+  mongodb-data:
+  redis-data:

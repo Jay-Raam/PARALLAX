@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    name: Lint · Typecheck · Tests · Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Unit tests (backend + frontend)
+        run: npm run test
+
+      - name: Build (api, worker, web)
+        run: npm run build
+
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build API image
+        run: docker build -f docker/Dockerfile.api -t parallax-api .
+      - name: Build worker image
+        run: docker build -f docker/Dockerfile.worker -t parallax-worker .
+      - name: Build web image
+        run: docker build -f docker/Dockerfile.web -t parallax-web .
