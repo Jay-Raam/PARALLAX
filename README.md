@@ -1,4 +1,10 @@
-# PARALLAX — Engineering Intelligence Platform
+# PARALLAX — Engineering Intelligence Platform ⚡
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Next.js 15](https://img.shields.io/badge/Frontend-Next.js%2015%20App%20Router-black.svg)](apps/web)
+[![GraphQL Yoga](https://img.shields.io/badge/API-GraphQL%20Yoga-E10098.svg)](apps/api)
+[![BullMQ](https://img.shields.io/badge/Background%20Workers-BullMQ%20%2B%20Redis-red.svg)](apps/api)
+[![MongoDB](https://img.shields.io/badge/Database-MongoDB%20Mongoose-green.svg)](docker-compose.yml)
 
 > **GitHub records what happened. PARALLAX explains what it means.**
 
@@ -6,9 +12,21 @@ PARALLAX connects to GitHub, collects repository activity, and turns it into
 measurable engineering health, risk, bottlenecks, trends, and actionable
 recommendations.
 
-```
-RAW DATA → NORMALIZATION → ANALYTICS → INTELLIGENCE → EXPLANATION → RECOMMENDATION
-```
+---
+
+## Start Here (5-Minute Code Review)
+
+If you are inspecting PARALLAX for software craftsmanship, architectural clarity, and queue reliability:
+
+| Component | Location | What to Inspect |
+| :--- | :--- | :--- |
+| **Health Scoring Engine** | [`apps/api/src/modules/health/healthService.ts`](apps/api/src/modules/health/healthService.ts) | Multi-factor weighted engineering posture evaluation (testing, security, release cadence, hygiene) |
+| **PR Risk Engine** | [`apps/api/src/modules/pulls/riskService.ts`](apps/api/src/modules/pulls/riskService.ts) | Deterministic risk scoring evaluating diff size, migration hazards, and missing tests |
+| **BullMQ Queue Orchestrator** | [`apps/api/src/queues/syncQueue.ts`](apps/api/src/queues/syncQueue.ts) | Asynchronous job processing with exponential backoff, worker concurrency, and inline fallback |
+| **GraphQL Subscription Hub** | [`apps/api/src/graphql/yoga.ts`](apps/api/src/graphql/yoga.ts) | Real-time WebSocket telemetry broadcasting sync status and metric adjustments |
+| **Command Palette Hub** | [`apps/web/src/components/CommandPalette.tsx`](apps/web/src/components/CommandPalette.tsx) | Instant cross-entity fuzzy search across repos, pull requests, and audit findings |
+
+---
 
 ## Architecture
 
@@ -121,19 +139,18 @@ Backend tests cover the health engine, PR risk engine, and the full sync →
 health pipeline against an in-memory MongoDB. E2E (Playwright) scaffolding
 lives in `e2e/` — see `npm run test:e2e`.
 
-## Key design decisions
+## Key Engineering Decisions & Trade-Offs
 
-- **MongoDB is the source of truth.** Redis only caches (TTL'd), queues work,
-  deduplicates webhooks, and holds transient sync state.
-- **The API never blocks on expensive work.** Syncs, analytics, health, and
-  recommendations are queued to BullMQ and processed by the worker.
-- **Idempotent sync.** Every GitHub entity upserts on a natural key; jobs retry
-  with exponential backoff.
-- **GraphQL safety.** Query depth + complexity limits, max page sizes, and
-  DataLoaders prevent N+1 and expensive operations.
-- **The frontend never sees GitHub tokens.** Sessions are httpOnly cookies;
-  OAuth tokens are encrypted at rest.
+| Decision | Why It Was Made | Alternative Considered & Why Rejected |
+| :--- | :--- | :--- |
+| **BullMQ Worker Process with Inline Fallback** | GitHub repository sync, webhook payload parsing, and health metric recalculations are asynchronous and CPU/IO heavy. Offloading to Redis BullMQ prevents Express event-loop starvation. | Handling sync computations synchronously within GraphQL resolvers. Rejected because processing large PR histories causes 504 gateway timeouts on client requests. |
+| **MongoDB as Source of Truth + Redis as Ephemeral Cache** | MongoDB provides schema flexibility for heterogeneous GitHub webhook payloads (commits, reviews, checks, deployment runs) without rigid SQL migrations. Redis stores TTL-cached query responses, rate-limiting tokens, and deduplication keys. | Storing everything in PostgreSQL. Rejected because nested JSON structures in GitHub issue events require constant schema alterations that degrade relational query velocity. |
+| **Encrypted At-Rest GitHub OAuth Tokens & HttpOnly Sessions** | Third-party GitHub OAuth tokens are encrypted at rest with AES-256 before storage in MongoDB. Browser sessions use signed, HttpOnly cookies with strict CSRF protection. | Passing raw GitHub tokens to the Next.js client or storing in local storage. Rejected because it exposes third-party write scopes to client-side credential exfiltration. |
+| **Deterministic Risk Scoring Algorithm** | Computes an explainable, auditable risk score (0-100) based on modified LOC, touch on auth/migration boundaries, and test coverage deltas without unpredictable LLM hallucinations. | Relying purely on generative AI prompts for risk classification. Rejected because automated CI gates require deterministic, reproducible verdicts for compliance. |
+
+---
 
 ## License
 
-Private project.
+Distributed under the [MIT License](LICENSE).
+
